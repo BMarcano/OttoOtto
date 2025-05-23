@@ -10,15 +10,14 @@ import Image        from "next/image"
 import Link         from "next/link"
 import { MapPin, Phone } from "lucide-react"
 import { supabase } from "@/lib/supabaseClient"
-import { MobileMenu }  from "@/components/mobile-menu"
 import { HeroSection } from "@/components/hero-section"
 
-/* ---------- util: traer ventas con filtros ---------- */
+/* ---------- util · traer ventas con filtros ---------- */
 async function fetchSales({
   propertyType,
   location,
   priceMin = 0,
-  priceMax = 99999999,
+  priceMax = 99_999_999,
   bedrooms,
 }: {
   propertyType?: string
@@ -44,6 +43,7 @@ async function fetchSales({
   return data
 }
 
+/* ====================================================== */
 export default function EnVenta() {
   /* ------------------ state ------------------ */
   const [properties, setProperties] = useState<any[]>([])
@@ -54,31 +54,57 @@ export default function EnVenta() {
   const [location    , setLocation]     = useState<string>("")
   const [priceRange  , setPriceRange]   = useState<string>("")
   const [bedrooms    , setBedrooms]     = useState<string>("")
+const [locations, setLocations] = useState<string[]>([]);
+useEffect(() => {
+  (async () => {
+    const { data, error } = await supabase
+      // pido SOLO la columna location
+      .from("properties")
+      .select("location")
+      .neq("location", null)           // quita nulos
+      .neq("location", "")             // quita vacíos
+      .order("location", { ascending: true });
 
-  /* primera carga */
-  useEffect(() => {
-    load()
-  }, [])
+    if (error) {
+      console.error("Error trayendo ubicaciones:", error);
+      return;
+    }
 
-  /* fetch con filtros */
+    // saco duplicados con un Set
+    const unique = Array.from(new Set(data.map((r) => r.location.trim())));
+    setLocations(unique);
+  })();
+}, []);
+// ─────────────────────────────────────────────────
+
+  /* primera carga + recarga automática al cambiar filtros */
+  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [propertyType, location, priceRange, bedrooms])
+
+  /* -------------- load -------------- */
   async function load() {
     setLoading(true)
 
-    let priceMin = 0, priceMax = 99999999
-    if (priceRange === "0-100k")       { priceMax = 100000 }
-    if (priceRange === "100k-300k")    { priceMin = 100000; priceMax = 300000 }
-    if (priceRange === "300k-500k")    { priceMin = 300000; priceMax = 500000 }
-    if (priceRange === "500k+")        { priceMin = 500000 }
+    /* rango precio */
+    let priceMin = 0, priceMax = 99_999_999
+    if (priceRange === "0-100k")       priceMax = 100_000
+    if (priceRange === "100k-300k")   { priceMin = 100_000; priceMax = 300_000 }
+    if (priceRange === "300k-500k")   { priceMin = 300_000; priceMax = 500_000 }
+    if (priceRange === "500k+")        priceMin = 500_000
 
-    const beds = bedrooms ? parseInt(bedrooms) : undefined
+    /* dormitorios */
+    const beds = bedrooms ? parseInt(bedrooms, 10) : undefined
+
+    /* ubicación “Todas” = sin filtro */
+    const loc = location === "Todas" ? undefined : location || undefined
 
     try {
       const data = await fetchSales({
         propertyType: propertyType || undefined,
-        location    : location     || undefined,
+        location    : loc,
         priceMin,
         priceMax,
-        bedrooms: beds,
+        bedrooms    : beds,
       })
       setProperties(data)
     } catch (err) {
@@ -91,54 +117,6 @@ export default function EnVenta() {
   /* -------------- UI -------------- */
   return (
     <div className="flex flex-col min-h-screen">
-      {/* ---------- TOP BAR ---------- */}
-      <div className="bg-navy-dark text-white py-2 px-4 flex flex-col md:flex-row justify-between items-center text-xs">
-        <div className="text-gray-300 text-center md:text-left mb-2 md:mb-0">
-          <span className="text-gold">APOSTANDO POR OTTO+OTTO, GANAS VOS</span>
-        </div>
-        <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-          <div className="flex items-center">
-            <MapPin className="h-4 w-4 mr-2 text-gold" />
-            <span>GORLERO 1047 PUNTA DEL ESTE</span>
-          </div>
-          <div className="flex items-center">
-            <Phone className="h-4 w-4 mr-2 text-gold" />
-            <span>+598 99 383 564</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ---------- NAV ---------- */}
-      <header className="bg-white py-4 border-b border-gray-200 sticky top-0 z-30">
-        <nav className="container mx-auto flex items-center justify-between px-4 lg:justify-center">
-          {/* logo móvil */}
-          <div className="flex lg:hidden items-center">
-            <div className="flex flex-col items-center">
-              <div className="text-xl font-logo tracking-wider text-navy">OTTO+OTTO</div>
-              <div className="text-xs tracking-widest text-gold-dark">NEGOCIOS INMOBILIARIOS</div>
-            </div>
-          </div>
-
-          {/* menú desktop */}
-          <div className="hidden lg:flex items-center space-x-8">
-            <Link href="/"          className="text-sm font-medium hover:text-gold">INICIO</Link>
-            <Link href="/proyectos" className="text-sm font-medium hover:text-gold">PROYECTOS</Link>
-            <Link href="/en-venta"  className="text-sm font-medium text-gold">EN VENTA</Link>
-            <Link href="/" className="px-8">
-              <div className="flex flex-col items-center">
-                <div className="text-2xl font-logo tracking-wider text-navy">OTTO+OTTO</div>
-                <div className="text-xs tracking-widest text-gold-dark">NEGOCIOS INMOBILIARIOS</div>
-              </div>
-            </Link>
-            <Link href="/alquiler"  className="text-sm font-medium hover:text-gold">ALQUILER</Link>
-            <Link href="/#services" className="text-sm font-medium hover:text-gold">SERVICIOS</Link>
-            <Link href="/contacto"  className="text-sm font-medium hover:text-gold">CONTACTO</Link>
-          </div>
-
-          <MobileMenu />
-        </nav>
-      </header>
-
       {/* ---------- MAIN ---------- */}
       <main className="flex-1 bg-white">
         <HeroSection
@@ -164,31 +142,33 @@ export default function EnVenta() {
                 <option value="local">Local</option>
               </select>
 
-              {/* ubicación */}
               <select
-                value={location}
-                onChange={(e)=>setLocation(e.target.value)}
-                className="w-full md:w-48 p-2 border border-gray-300 rounded-sm"
-              >
-                <option value="">Ubicación</option>
-                <option value="Península">Península</option>
-                <option value="Mansa">Mansa</option>
-                <option value="Brava">Brava</option>
-                <option value="Roosevelt">Roosevelt</option>
-                <option value="Todas">Todas</option>
-              </select>
+  value={location}
+  onChange={(e) => setLocation(e.target.value)}
+  className="w-full md:w-48 p-2 border border-gray-300 rounded-sm"
+>
+  <option value="">Ubicación</option>
+  <option value="Todas">Todas</option>
 
-              {/* precio (rangos diferentes para venta) */}
+  {locations.map((loc) => (
+    <option key={loc} value={loc}>
+      {loc}
+    </option>
+  ))}
+</select>
+
+
+              {/* precio */}
               <select
                 value={priceRange}
                 onChange={(e)=>setPriceRange(e.target.value)}
                 className="w-full md:w-48 p-2 border border-gray-300 rounded-sm"
               >
                 <option value="">Precio</option>
-                <option value="0-100k">Hasta USD 100 000</option>
-                <option value="100k-300k">USD 100 000-300 000</option>
-                <option value="300k-500k">USD 300 000-500 000</option>
-                <option value="500k+">Más de USD 500 000</option>
+                <option value="0-100k">Hasta USD 100.000</option>
+                <option value="100k-300k">USD 100.000-300.000</option>
+                <option value="300k-500k">USD 300.000-500.000</option>
+                <option value="500k+">Más de USD 500.000</option>
               </select>
 
               {/* dormitorios */}
@@ -205,7 +185,7 @@ export default function EnVenta() {
                 <option value="4">4 +</option>
               </select>
 
-              {/* botón */}
+              {/* botón (opcional: con recarga auto ya no es imprescindible) */}
               <button
                 onClick={load}
                 className="w-full md:w-auto bg-gold hover:bg-gold-dark text-navy-dark px-6 py-2 transition-colors duration-300"
@@ -219,7 +199,7 @@ export default function EnVenta() {
         {/* -------- GRID -------- */}
         <div className="container mx-auto py-12 px-4">
           {loading ? (
-            <p className="text-center text-gray-500">Cargando propiedades...</p>
+            <p className="text-center text-gray-500">Cargando propiedades…</p>
           ) : properties.length === 0 ? (
             <p className="text-center text-gray-500">No hay propiedades disponibles.</p>
           ) : (
@@ -229,14 +209,14 @@ export default function EnVenta() {
                   <Link href={`/propiedad/${p.id}`} className="block relative">
                     <div className="relative">
                       <Image
-                        src={p.cover_url || "/images/fallback.jpg"}
+                        src={p.cover_url || p.image_url || "/images/fallback.jpg"}
                         alt={p.title}
                         width={800}
                         height={600}
                         className="w-full h-64 object-cover"
                       />
                       <div className="absolute top-4 right-4 bg-gold px-3 py-1 text-xs text-navy-dark font-medium">
-                        Ref. {p.legacy_id?.split("/").pop()}
+                        Ref.&nbsp;{p.legacy_id?.split("/").pop() ?? p.id}
                       </div>
                     </div>
                     <div className="p-6">
@@ -248,13 +228,13 @@ export default function EnVenta() {
                       </p>
                       <div className="flex justify-between items-center mb-4">
                         <span className="text-xl font-bold text-gold-dark">
-                          {p.currency || "USD"} {p.price?.toLocaleString()}
+                          {(p.currency || "USD")}&nbsp;{p.price?.toLocaleString()}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm text-gray-500">
-                        <div className="flex items-center">🛏 {p.bedrooms || "-"} Hab.</div>
-                        <div className="flex items-center">🛁 {p.bathrooms || "-"} Baños</div>
-                        <div className="flex items-center">📐 {p.area || "-"} m²</div>
+                        <div className="flex items-center">🛏 {p.bedrooms ?? "-"} Hab.</div>
+                        <div className="flex items-center">🛁 {p.bathrooms ?? "-"} Baños</div>
+                        <div className="flex items-center">📐 {p.area ?? "-"} m²</div>
                       </div>
                     </div>
                   </Link>
@@ -264,11 +244,6 @@ export default function EnVenta() {
           )}
         </div>
       </main>
-
-      {/* ---------- FOOTER ---------- */}
-      <footer className="bg-navy-dark text-white py-12">
-        {/* tu footer sin cambios */}
-      </footer>
     </div>
   )
 }

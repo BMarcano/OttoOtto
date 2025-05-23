@@ -45,12 +45,34 @@ export default function Alquiler() {
   /* state -------------------------------------------------- */
   const [properties, setProperties] = useState<any[]>([])
   const [loading   , setLoading]    = useState(true)
+const [locations, setLocations] = useState<string[]>([]);
 
   /* filtros */
   const [propertyType, setPropertyType] = useState("")
   const [location    , setLocation]     = useState("")
   const [priceRange  , setPriceRange]   = useState("")
   const [bedrooms    , setBedrooms]     = useState("")
+useEffect(() => {
+  (async () => {
+    const { data, error } = await supabase
+      // pido SOLO la columna location
+      .from("properties")
+      .select("location")
+      .neq("location", null)           // quita nulos
+      .neq("location", "")             // quita vacíos
+      .order("location", { ascending: true });
+
+    if (error) {
+      console.error("Error trayendo ubicaciones:", error);
+      return;
+    }
+
+    // saco duplicados con un Set
+    const unique = Array.from(new Set(data.map((r) => r.location.trim())));
+    setLocations(unique);
+  })();
+}, []);
+// ─────────────────────────────────────────────────
 
   /* carga inicial */
   useEffect(() => { load() }, [])
@@ -95,46 +117,9 @@ export default function Alquiler() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* ---------- TOP BAR ---------- */}
-      <div className="bg-navy-dark text-white py-2 px-4 flex flex-col md:flex-row justify-between items-center text-xs">
-        <div className="text-gray-300 text-center md:text-left mb-2 md:mb-0">
-          <span className="text-gold">APOSTANDO POR OTTO+OTTO, GANAS VOS</span>
-        </div>
-        <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-          <div className="flex items-center"><MapPin className="h-4 w-4 mr-2 text-gold" />GORLERO 1047 PUNTA DEL ESTE</div>
-          <div className="flex items-center"><Phone  className="h-4 w-4 mr-2 text-gold" />+598&nbsp;99&nbsp;383&nbsp;564</div>
-        </div>
-      </div>
+      
 
-      {/* ---------- NAV ---------- */}
-      <header className="bg-white py-4 border-b border-gray-200 sticky top-0 z-30">
-        <nav className="container mx-auto flex items-center justify-between px-4 lg:justify-center">
-          {/* mobile logo */}
-          <div className="flex lg:hidden items-center">
-            <div className="flex flex-col items-center">
-              <div className="text-xl font-logo tracking-wider text-navy">OTTO+OTTO</div>
-              <div className="text-xs tracking-widest text-gold-dark">NEGOCIOS INMOBILIARIOS</div>
-            </div>
-          </div>
-
-          {/* desktop menu */}
-          <div className="hidden lg:flex items-center space-x-8">
-            <Link href="/"          className="text-sm font-medium hover:text-gold">INICIO</Link>
-            <Link href="/proyectos" className="text-sm font-medium hover:text-gold">PROYECTOS</Link>
-            <Link href="/en-venta"  className="text-sm font-medium hover:text-gold">EN VENTA</Link>
-            <Link href="/" className="px-8">
-              <div className="flex flex-col items-center">
-                <div className="text-2xl font-logo tracking-wider text-navy">OTTO+OTTO</div>
-                <div className="text-xs tracking-widest text-gold-dark">NEGOCIOS INMOBILIARIOS</div>
-              </div>
-            </Link>
-            <Link href="/alquiler"  className="text-sm font-medium text-gold">ALQUILER</Link>
-            <Link href="/#services" className="text-sm font-medium hover:text-gold">SERVICIOS</Link>
-            <Link href="/contacto"  className="text-sm font-medium hover:text-gold">CONTACTO</Link>
-          </div>
-
-          <MobileMenu />
-        </nav>
-      </header>
+      
 
       {/* ---------- HERO ---------- */}
       <main className="flex-1 bg-white">
@@ -158,16 +143,22 @@ export default function Alquiler() {
                 <option value="local">Local</option>
               </select>
 
-              {/* ubicación */}
-              <select value={location} onChange={e=>setLocation(e.target.value)}
-                className="w-full md:w-48 p-2 border border-gray-300 rounded-sm">
-                <option value="">Ubicación</option>
-                <option value="Península">Península</option>
-                <option value="Mansa">Mansa</option>
-                <option value="Brava">Brava</option>
-                <option value="Roosevelt">Roosevelt</option>
-                <option value="Todas">Todas</option>
-              </select>
+              <select
+  value={location}
+  onChange={(e) => setLocation(e.target.value)}
+  className="w-full md:w-48 p-2 border border-gray-300 rounded-sm"
+>
+  <option value="">Ubicación</option>
+  <option value="Todas">Todas</option>
+
+  {/* genera una <option> por cada barrio real */}
+  {locations.map((loc) => (
+    <option key={loc} value={loc}>
+      {loc}
+    </option>
+  ))}
+</select>
+
 
               {/* precio */}
               <select value={priceRange} onChange={e=>setPriceRange(e.target.value)}
@@ -249,26 +240,7 @@ export default function Alquiler() {
         </div>
       </main>
 
-      {/* ---------- FOOTER ---------- */}
-      <footer className="bg-navy-dark text-white py-12">
-        <div className="container mx-auto text-center">
-          <div className="mb-8">
-            <div className="flex flex-col items-center">
-              <div className="text-2xl font-logo tracking-wider">OTTO+OTTO</div>
-              <div className="text-xs tracking-widest text-gold">NEGOCIOS INMOBILIARIOS</div>
-            </div>
-          </div>
 
-          <div className="text-gray-400 text-sm mb-6">
-            Llámanos: +598&nbsp;99&nbsp;383&nbsp;564 | ottonegociosinmobiliarios@gmail.com | Gorlero 1047 Punta del Este
-          </div>
-
-          {/* redes sociales … */}
-          <div className="text-xs text-gray-500">
-            © 2023 Otto+Otto Negocios Inmobiliarios. Todos los derechos reservados.
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }
