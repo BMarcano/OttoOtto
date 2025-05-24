@@ -111,17 +111,7 @@ export default async function PropertyDetail({ params }: { params: { id: string 
                 </div>
               </section>
 
-              {/* ubicación */}
-              <section className="bg-white p-6 rounded-lg shadow-md">
-                <h2 className="text-2xl font-secondary text-navy-dark mb-4">Ubicación</h2>
-                <div className="relative h-[300px] w-full bg-gray-200 rounded-lg mb-4 flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="h-8 w-8 text-gold mx-auto mb-2" />
-                    <p className="text-navy-dark">Coordenadas: {p.coordinates ?? "–"}</p>
-                    <p className="text-gray-500 mt-2">{p.location ?? "–"}</p>
-                  </div>
-                </div>
-              </section>
+              
             </div>
 
             {/* —— columna derecha —— */}
