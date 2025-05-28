@@ -11,7 +11,6 @@ interface ProjectCardProps {
   location: string
   description: string
   image: string
-  units: number
   availableUnits: number
   priceFrom: string
   features: string[]
@@ -23,7 +22,6 @@ export function ProjectCard({
   location,
   description,
   image,
-  units,
   availableUnits,
   priceFrom,
   features,
@@ -91,16 +89,11 @@ export function ProjectCard({
       <div className="p-6">
         <p className="text-gray-600 mb-4">{description}</p>
         <div className="flex justify-between items-center mb-4 text-sm text-gray-500">
-          <span>Unidades: {units}</span>
           <span>
             Disponibles: <span className="text-gold-dark font-bold">{availableUnits}</span>
           </span>
-          <span>
-            Desde: <span className="text-gold-dark font-bold">{priceFrom}</span>
-          </span>
         </div>
         <div className="mb-6">
-          <h3 className="text-navy-dark font-medium mb-2">Características:</h3>
           <ul className="grid grid-cols-2 gap-2">
             {features.slice(0, 4).map((feature, index) => (
               <li key={index} className="flex items-center text-sm text-gray-600">

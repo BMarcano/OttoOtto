@@ -135,7 +135,7 @@ export default function Alquiler() {
       <main className="flex-1 bg-white">
         <HeroSection
           title="PROPIEDADES EN ALQUILER"
-          subtitle="DESCUBRA NUESTRAS EXCLUSIVAS PROPIEDADES"
+          subtitle="DESCUBRA NUESTRAS EXCLUSIVAS PROPIEDADES EN ALQUILER ANUAL, INVERNAL O TEMPORAL."
           backgroundImage="/images/coastal-aerial-view.jpeg"
         />
 

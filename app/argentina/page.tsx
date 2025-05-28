@@ -14,11 +14,11 @@ export default function Argentina() {
       location: "Buenos Aires, Argentina",
       description: "Inmobiliaria especializada en propiedades de lujo en las zonas más exclusivas de Buenos Aires.",
       website: "https://www.virginrealty.com.ar/",
-      bgColor: "bg-black", // Fondo negro para el logo de Virgin
+      bgColor: "bg-white", // Fondo negro para el logo de Virgin
     },
     {
       name: "Carlos Dodorico",
-      logo: "/images/carlos-dodorico.jpg", // Logo de Carlos (marcador verde)
+      logo: "/images/Carlos.png", // Logo de Carlos (marcador verde)
       location: "Buenos Aires, Argentina",
       description:
         "Más de 30 años de experiencia en el mercado inmobiliario argentino, ofreciendo un servicio personalizado y de calidad.",

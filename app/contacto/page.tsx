@@ -57,7 +57,7 @@ export default function Contacto() {
               <OfficeCard
                 title="Sucursal Buenos Aires"
                 address="Av. Acoyte 580 Depto 2E"
-                tel="+598 99 383 564"
+                tel="+54 911 6658 6391"
                 mapHref="https://maps.google.com/?q=Avenida+Acoyte+580+Buenos+Aires"
               />
             </div>

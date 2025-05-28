@@ -216,11 +216,19 @@ export default function Home() {
                   </svg>
                 </div>
                 <span className="text-gold uppercase tracking-wider text-sm mb-2">SERVICIOS</span>
-                <h3 className="text-2xl font-secondary text-navy-dark mb-4">CLUB+OTTO</h3>
-                <p className="text-gray-500 text-center">
-                  Una membresía exclusiva para todos nuestros clientes que podrán acceder a descuentos y beneficios
-                  premium en gastronomía, belleza, entretenimiento, interiorismo y más.
-                </p>
+                <a
+  href="https://otto-otto.my.canva.site/clubotto"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="block text-center cursor-pointer"
+>
+  <h3 className="text-2xl font-secondary text-navy-dark mb-4">CLUB+OTTO</h3>
+  <p className="text-gray-500">
+    Una membresía exclusiva para todos nuestros clientes que podrán acceder a descuentos y beneficios
+    premium en gastronomía, belleza, entretenimiento, interiorismo y más.
+  </p>
+</a>
+
               </div>
 
               {/* Service 3 */}
