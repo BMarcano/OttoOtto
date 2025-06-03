@@ -76,7 +76,7 @@ export default function Home() {
         {/* ═══════════════ Hero Section ═══════════════ */}
         <section id="home" ref={homeRef} className="relative">
           <div className="relative h-[calc(100vh-120px)] w-full">
-            <div className="absolute inset-0 bg-navy/70 z-10"></div>
+            <div className="absolute inset-0 bg-navy/40 z-10"></div>
             <Image
               src="/images/hero-image.jpeg"
               alt="Vista aérea de costa con aguas turquesas"

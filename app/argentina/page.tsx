@@ -18,7 +18,7 @@ export default function Argentina() {
     },
     {
       name: "Carlos Dodorico",
-      logo: "/images/Carlos.png", // Logo de Carlos (marcador verde)
+      logo: "/images/Carlos.jpg", // Logo de Carlos (marcador verde)
       location: "Buenos Aires, Argentina",
       description:
         "Más de 30 años de experiencia en el mercado inmobiliario argentino, ofreciendo un servicio personalizado y de calidad.",
