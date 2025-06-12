@@ -1,10 +1,10 @@
 "use client"
-
-import { useEffect, useRef, useState } from "react"
+import ContactForm from "@/components/contact-form";
+import { useEffect, useRef, useState, FormEvent } from "react";
 import Image                          from "next/image"
 import Link                           from "next/link"
 import { MapPin, Phone, Star, StarHalf } from "lucide-react"
-
+import { ProjectCard } from "@/components/project-card"
 import { PropertyCard } from "@/components/property-card"
 import { MobileMenu   } from "@/components/mobile-menu"
 import { supabase     } from "@/lib/supabaseClient"
@@ -25,7 +25,18 @@ type PropertyRow = {
   image_url        : string | null
    featured?: boolean            
 }
-
+type ProjectRow = {
+  id            : string
+  slug          : string
+  title         : string
+  location      : string | null
+  price_from    : number | null
+  currency      : string | null
+  image_url     : string | null
+  units: number | null
+  description_short: string
+}
+  
 export default function Home() {
   /* refs para desplazamiento suave ---------------------------------- */
   const servicesRef = useRef<HTMLElement>(null)
@@ -40,7 +51,25 @@ export default function Home() {
     if (window.location.hash)
       setTimeout(()=>scrollToSection(window.location.hash.substring(1)), 100)
   }, [])
+    /* ───────── estado proyectos portada ───────── */
 
+  const [projects, setProjects] = useState<ProjectRow[]>([])
+  const [loadingProj, setLoadingProj] = useState(true)
+  useEffect(()=>{
+    let cancel=false
+    ;(async()=>{
+      const { data, error } = await supabase
+        .from("projectss")
+        .select("id, slug, title, location, price_from, currency, image_url, units, description_short")
+        .order("created_at",{ascending:false})
+        .limit(4)                       // solo 4 en portada
+      if(!cancel){
+        setProjects(error?[]:data as ProjectRow[])
+        setLoadingProj(false)
+      }
+    })()
+    return()=>{cancel=true}
+  },[])
   /* estado: propiedades destacadas ---------------------------------- */
   const [featured, setFeatured] = useState<PropertyRow[]>([])
   const [loading,  setLoading ] = useState(true)
@@ -467,91 +496,47 @@ export default function Home() {
 
         {/* ═══════════════ PROYECTOS EXCLUSIVOS ═══════════════ */}
         <section className="py-16 bg-white">
-          <div className="container mx-auto text-center px-4">
-            <h2 className="text-4xl sm:text-5xl font-logo tracking-wider mb-4 text-navy-dark">
-              PROYECTOS EXCLUSIVOS
-            </h2>
-            <p className="text-gold-dark mb-16 tracking-wide">
-              DESCUBRA NUESTROS DESARROLLOS INMOBILIARIOS DE LUJO
-            </p>
+        <div className="container mx-auto text-center px-4">
+          <h2 className="text-4xl sm:text-5xl font-logo tracking-wider mb-4 text-navy-dark">
+            PROYECTOS EXCLUSIVOS
+          </h2>
+          <p className="text-gold-dark mb-16 tracking-wide">
+            DESCUBRA NUESTROS DESARROLLOS INMOBILIARIOS DE LUJO
+          </p>
 
-            <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Proyecto 1 */}
-                <div className="relative h-[400px] rounded-lg overflow-hidden">
-                  <Image src="/images/project-building-1.png" alt="Proyecto Marina Bay" fill
-                         className="object-cover"/>
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy-dark/80 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3 className="text-2xl font-logo mb-2">Marina Bay</h3>
-                    <p className="text-sm text-gold mb-4">Punta del Este</p>
-                    <Link href="/proyectos/marina-bay"
-                          className="inline-block bg-gold hover:bg-gold-dark text-navy-dark px-4 py-2 text-sm rounded-md transition-all">
-                      Ver Proyecto
-                    </Link>
-                  </div>
-                </div>
+          {loadingProj ? (
+            <p className="text-gray-500">Cargando proyectos…</p>
+          ) : projects.length === 0 ? (
+            <p className="text-gray-500">Aún no hay proyectos cargados.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+              {projects.map(pr=>(
+                <ProjectCard
+  key={pr.id}
+  id={pr.slug || pr.id}
+  name={pr.title}
+  location={pr.location ?? ""}
+  image={pr.image_url || "/images/fallback.jpg"}
+  availableUnits={pr.units ?? 0}
+  priceFrom={`${pr.currency || "USD"} ${pr.price_from?.toLocaleString()}`}
+  description={pr.description_short || ""}
+  features={[]}
+/>
 
-                {/* Proyecto 2 */}
-                <div className="relative h-[400px] rounded-lg overflow-hidden">
-                  <Image src="/images/project-building-2.png" alt="Proyecto Ocean Towers" fill
-                         className="object-cover"/>
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy-dark/80 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3 className="text-2xl font-logo mb-2">Ocean Towers</h3>
-                    <p className="text-sm text-gold mb-4">La Barra</p>
-                    <Link href="/proyectos/ocean-towers"
-                          className="inline-block bg-gold hover:bg-gold-dark text-navy-dark px-4 py-2 text-sm rounded-md transition-all">
-                      Ver Proyecto
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Proyecto 3 */}
-                <div className="relative h-[400px] rounded-lg overflow-hidden">
-                  <Image src="/images/project-building-3.png" alt="Proyecto Pinares Park" fill
-                         className="object-cover"/>
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy-dark/80 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3 className="text-2xl font-logo mb-2">Pinares Park</h3>
-                    <p className="text-sm text-gold mb-4">Pinares</p>
-                    <Link href="/proyectos/pinares-park"
-                          className="inline-block bg-gold hover:bg-gold-dark text-navy-dark px-4 py-2 text-sm rounded-md transition-all">
-                      Ver Proyecto
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Proyecto 4 */}
-                <div className="relative h-[400px] rounded-lg overflow-hidden">
-                  <Image src="/images/project-building-4.png" alt="Proyecto Mansa View" fill
-                         className="object-cover"/>
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy-dark/80 to-transparent"></div>
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3 className="text-2xl font-logo mb-2">Mansa View</h3>
-                    <p className="text-sm text-gold mb-4">Playa Mansa</p>
-                    <Link href="/proyectos/mansa-view"
-                          className="inline-block bg-gold hover:bg-gold-dark text-navy-dark px-4 py-2 text-sm rounded-md transition-all">
-                      Ver Proyecto
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-12">
-                <Link
-                  href="/proyectos"
-                  className="inline-block bg-gold hover:bg-gold-dark text-navy-dark px-8 py-3 text-sm tracking-wider rounded-md transition-all"
-                >
-                  VER TODOS LOS PROYECTOS
-                </Link>
-              </div>
+              ))}
             </div>
-          </div>
-        </section>
+          )}
 
+          <div className="mt-12">
+            <Link
+              href="/proyectos"
+              className="inline-block bg-gold hover:bg-gold-dark text-navy-dark px-8 py-3 text-sm tracking-wider rounded-md transition-all"
+            >
+              VER TODOS LOS PROYECTOS
+            </Link>
+          </div>
+        </div>
+      </section>
         {/* ═══════════════ CONTACTO ═══════════════ */}
         <section id="contact" className="py-16 bg-navy text-white">
           <div className="container mx-auto px-4">
@@ -563,47 +548,14 @@ export default function Home() {
                   UNA ASESORÍA
                 </h2>
                 <p className="text-gray-400 mb-8">
-                  Contáctanos para programar una asesoría personalizada sobre nuestras exclusivas propiedades y descubre
-                  el lujo que te espera.
+                  Contáctanos para programar una asesoría personalizada sobre
+                  nuestras exclusivas propiedades y descubre el lujo que te
+                  espera.
                 </p>
               </div>
 
               <div className="px-4">
-                <form className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder="Nombre"
-                      className="bg-white border-none p-3 w-full rounded-lg focus:ring-2 focus:ring-gold transition-all"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Apellido"
-                      className="bg-white border-none p-3 w-full rounded-lg focus:ring-2 focus:ring-gold transition-all"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      className="bg-white border-none p-3 w-full rounded-lg focus:ring-2 focus:ring-gold transition-all"
-                    />
-                    <input
-                      type="tel"
-                      placeholder="Teléfono"
-                      className="bg-white border-none p-3 w-full rounded-lg focus:ring-2 focus:ring-gold transition-all"
-                    />
-                  </div>
-                  <textarea
-                    placeholder="Escribe tu mensaje aquí..."
-                    className="bg-white border-none p-3 w-full h-32 rounded-lg focus:ring-2 focus:ring-gold transition-all"
-                  ></textarea>
-                  <button
-                    className="w-full bg-gold hover:bg-gold-dark text-navy-dark p-3 font-medium rounded-lg transition-all"
-                  >
-                    ENVIAR
-                  </button>
-                </form>
+                <ContactForm />
               </div>
             </div>
           </div>
