@@ -175,7 +175,7 @@ export default async function PropertyDetail({
                   </div>
                   <div className="flex items-center text-navy-dark">
                     <Mail className="h-4 w-4 mr-2 text-gold" />
-                    info@otto-otto.com
+                    ottonegociosinmobiliarios@gmail.com
                   </div>
                 </div>
               </div>
