@@ -35,7 +35,7 @@ export default function ContactForm({
   return (
     <form
       onSubmit={handleSubmit}
-      action="https://formsubmit.co/brayanmarcanor@gmail.com"
+      action="https://formsubmit.co/ottonegociosinmobiliarios@gmail.com"
       method="POST"
       className="space-y-4"
     >
