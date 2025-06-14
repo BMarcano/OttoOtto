@@ -103,60 +103,74 @@ export default function Home() {
       <main className="relative flex-1">
 
         {/* ═══════════════ Hero Section ═══════════════ */}
-        <section id="home" ref={homeRef} className="relative">
-          <div className="relative h-[calc(100vh-120px)] w-full">
-            <div className="absolute inset-0 bg-navy/40 z-10"></div>
-            <Image
-              src="/images/hero-image.jpeg"
-              alt="Vista aérea de costa con aguas turquesas"
-              fill
-              className="object-cover"
-              priority
-            />
-            <canvas
-              className="absolute inset-0 z-20 pointer-events-none"
-              data-particles
-              data-particles-count="100"
-            ></canvas>
+        {/* HERO ───────────────────────────────────────────────────────── */}
+<section id="home" ref={homeRef} className="relative">
+  {/* ——— wrapper alto pantalla menos navbar ——— */}
+  <div className="relative h-[calc(100vh-120px)] w-full">
+    {/* overlay azul */}
+    <div className="absolute inset-0 bg-navy/40 z-10" />
 
-            {/* Hero content */}
-            <div className="relative z-20 flex flex-col items-center justify-center h-full text-white text-center px-4">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-logo tracking-[0.15em] sm:tracking-[0.2em] mb-6">
-                Propiedades &
-              </h1>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-logo tracking-[0.15em] sm:tracking-[0.2em] mb-6">
-                Inversiones
-              </h1>
-              <p className="text-xs sm:text-sm md:text-base tracking-[0.2em] md:tracking-[0.3em] mb-12 text-gold">
-                DESCUBRE PROPIEDADES EXCLUSIVAS EN LAS MEJORES UBICACIONES
-              </p>
-              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                <Link
-                  href="/contacto"
-                  className="bg-gold hover:bg-gold-dark text-navy-dark px-8 py-3 text-sm tracking-wider rounded-md transition-all"
-                >
-                  AGENDAR UNA ASESORÍA
-                </Link>
-                <Link
-                  href="/en-venta"
-                  className="border border-gold hover:bg-gold/10 text-gold px-8 py-3 text-sm tracking-wider rounded-md transition-all"
-                >
-                  VER PROPIEDADES
-                </Link>
-              </div>
-            </div>
+    {/* imagen de fondo */}
+    <Image
+      src="/images/hero-image.jpeg"
+      alt="Vista aérea de costa con aguas turquesas"
+      fill
+      priority
+      className="object-cover"
+    />
 
-            {/* Buy-now lateral (desktop) */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 z-30 hidden md:block">
-              <Link
-                href="/contacto"
-                className="bg-gold text-navy-dark py-6 px-3 flex flex-col items-center justify-center text-xs font-bold tracking-widest hover:bg-gold-dark transition-colors"
-              >
-{"COMPRAR".split("").map((c, i) => <span key={`${c}-${i}`}>{c}</span>)}
-              </Link>
-            </div>
-          </div>
-        </section>
+    {/* partículas decorativas (si las usas) */}
+    <canvas
+      className="absolute inset-0 z-20 pointer-events-none"
+      data-particles
+      data-particles-count="100"
+    />
+
+    {/* ───────── contenido central ───────── */}
+    <div className="relative z-20 flex flex-col items-center justify-center h-full text-white text-center px-4">
+      <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-logo tracking-[0.15em] sm:tracking-[0.2em] mb-6">
+        Propiedades &
+      </h1>
+      <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-logo tracking-[0.15em] sm:tracking-[0.2em] mb-6">
+        Inversiones
+      </h1>
+      <p className="text-xs sm:text-sm md:text-base tracking-[0.2em] md:tracking-[0.3em] mb-12 text-gold">
+        DESCUBRE PROPIEDADES EXCLUSIVAS EN LAS MEJORES UBICACIONES
+      </p>
+
+      <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+        <Link
+          href="/contacto"
+          className="bg-gold hover:bg-gold-dark text-navy-dark px-8 py-3 text-sm tracking-wider rounded-md transition-all"
+        >
+          AGENDAR UNA ASESORÍA
+        </Link>
+        <Link
+          href="/en-venta"
+          className="border border-gold hover:bg-gold/10 text-gold px-8 py-3 text-sm tracking-wider rounded-md transition-all"
+        >
+          VER PROPIEDADES
+        </Link>
+      </div>
+    </div>
+
+    {/* ───────── botón “COMPRAR” lateral ───────── */}
+    <Link
+  href="/contacto"
+  className="
+    absolute right-0 top-1/2 -translate-y-1/2 z-30
+    hidden md:flex             /* solo en ≥ md */
+    h-60 w-14 bg-gold text-navy-dark
+    items-center justify-center vertical-text   /* ⬅ la nueva utilidad */
+    text-lg font-bold tracking-widest
+    hover:bg-gold-dark transition-colors
+  "
+>
+  COMPRAR
+</Link>
+  </div>
+</section>
+
 
         {/* ═══════════════ PROPIEDADES DE LUJO EN PUNTA DEL ESTE ═══════════════ */}
         <section id="downtown" className="py-16 container mx-auto">
