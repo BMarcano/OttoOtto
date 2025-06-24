@@ -16,6 +16,7 @@ interface PropertyCardProps {
   area: number
   image: string
   featured?: boolean
+  crm_id:number
 }
 
 export function PropertyCard({
@@ -29,6 +30,7 @@ export function PropertyCard({
   area,
   image,
   featured = false,
+  crm_id,
 }: PropertyCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
@@ -84,7 +86,7 @@ export function PropertyCard({
             style={{ transform: isHovered ? "scale(1.05)" : "scale(1)" }}
           />
           <div className="absolute top-4 right-4 bg-gold px-3 py-1 text-xs text-navy-dark font-medium z-20">
-            Ref. {id}
+            Ref. {crm_id}
           </div>
 
           {featured && (

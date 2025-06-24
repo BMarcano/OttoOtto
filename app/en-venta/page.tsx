@@ -231,7 +231,7 @@ export default function EnVenta() {
                           className="w-full h-64 object-cover"
                         />
                         <div className="absolute top-4 right-4 bg-gold px-3 py-1 text-xs text-navy-dark font-medium">
-                          Ref.&nbsp;{p.legacy_id?.split("/").pop() ?? p.id}
+                          Ref.&nbsp;{p.legacy_id?.split("/").pop() ?? p.crm_id}
                         </div>
                       </div>
                       <div className="p-6">

@@ -13,6 +13,7 @@ import { supabase     } from "@/lib/supabaseClient"
 /*  tipo mínimo de fila que leeremos de Supabase                       */
 type PropertyRow = {
   id               : string
+  crm_id : number
   title            : string
   location         : string | null
   description_short: string | null
@@ -27,6 +28,8 @@ type PropertyRow = {
 }
 type ProjectRow = {
   id            : string
+    crm_id : number
+
   slug          : string
   title         : string
   location      : string | null
@@ -60,7 +63,7 @@ export default function Home() {
     ;(async()=>{
       const { data, error } = await supabase
         .from("projectss")
-        .select("id, slug, title, location, price_from, currency, image_url, units, description_short")
+        .select("id, slug, title, location, price_from, currency, image_url, units, description_short, crm_id")
         .order("created_at",{ascending:false})
         .limit(4)                       // solo 4 en portada
       if(!cancel){
@@ -358,6 +361,7 @@ export default function Home() {
                   <PropertyCard
                     key={prop.id}
                     id={prop.id}
+                    crm_id={prop.crm_id}
                     title={prop.title}
                     location={prop.location ?? ""}
                     description={prop.description_short ?? ""}
