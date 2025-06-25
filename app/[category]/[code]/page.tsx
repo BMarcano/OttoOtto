@@ -1,24 +1,21 @@
-/* app/[category]/[code]/page.tsx
- * Redirige enlaces antiguos del tipo  /Apartamento/28853  →  /propiedad/<uuid>
- * ------------------------------------------------------- */
-import { redirect }   from "next/navigation";
-import { supabase }   from "@/lib/supabaseClient";
+/* app/[category]/[code]/page.tsx  */
+import { redirect } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 
 export default async function LegacyRedirect({
-  params:{ code },
-}:{ params:{ code:string } }) {
+  params: { code },
+}: {
+  params: { code: string };
+}) {
+  const { data: matches, error } = await supabase
+    .from("properties")
+    .select("id, deal_type")
+    .eq("crm_id", code);
 
-  /* 1 · busca primero VENTA; si no hay toma ALQUILER ---------------- */
-  const { data } = await supabase
-  .from("properties")
-  .select("id, deal_type")
-  .eq("crm_id", code)              // ← ahora busca por crm_id
-  .order("deal_type", { ascending: false }) // 'sale' antes que 'rent'
-  .single();
+  if (error || !matches?.length) redirect("/404");
 
-  /* 2 · si no existe ⇒ 404 ----------------------------------------- */
-  if (!data) redirect("/404");
+  const primary =
+    matches.find((p) => p.deal_type === "sale") ?? matches[0];
 
-  /* 3 · redirección permanente ------------------------------------- */
-  redirect(`/propiedad/${data.id}`);           // 301
+  redirect(`/propiedad/${primary.id}`);                     // 301
 }

@@ -23,13 +23,24 @@ export default async function PropertyDetail({
 }: {
   params: { id: string };
 }) {
-  const { data: p, error } = await supabase
-    .from("properties")
-    .select("*")
-    .eq("id", params.id)
-    .single();
+const { data: p, error } = await supabase
+  .from("properties")
+  .select("*")
+  .eq("id", params.id)
+  .single();
 
-  if (error || !p) notFound();
+const { data: siblings } = await supabase
+  .from("properties")
+  .select("*")
+  .eq("crm_id", p.crm_id)
+  .neq("id", p.id);                            // ⟵ evita duplicar la actual
+
+const deals = [p, ...(siblings ?? [])];
+
+const sale = deals.find((d) => d.deal_type === "sale") ?? null;
+const rent = deals.find((d) => d.deal_type === "rent") ?? null;
+
+if (error || !p) notFound();
 
   const priceTxt = `${p.currency || "USD"} ${
     p.price ? p.price.toLocaleString() : "-"
@@ -75,23 +86,35 @@ export default async function PropertyDetail({
 
         <header className="container mx-auto py-6 px-4 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl md:text-4xl font-logo text-navy-dark">
-              {p.title}
-            </h1>
-            {p.location && (
-              <p className="text-gray-500 mt-2 flex items-center">
-                <MapPin className="h-4 w-4 mr-1 text-gold" />
-                {p.location}
-              </p>
-            )}
-          </div>
-          <div className="mt-4 md:mt-0">
-            <span className="text-2xl md:text-3xl font-bold text-gold-dark">
-              {priceTxt}
-            </span>
-            <div className="text-sm text-gray-500 mt-1">
-              Ref. {p.legacy_id?.split("/").pop() ?? p.id.slice(0, 6)}
-            </div>
+    <h1 className="text-3xl md:text-4xl font-logo text-navy-dark">
+      {p.title}
+    </h1>
+    {p.location && (
+      <p className="text-gray-500 mt-2 flex items-center">
+        <MapPin className="h-4 w-4 mr-1 text-gold" />
+        {p.location}
+      </p>
+    )}
+  </div>
+
+  <div className="mt-4 md:mt-0 space-y-1">
+    {sale && (
+      <PriceTag
+        label="Venta"
+        currency={sale.currency ?? "USD"}
+        amount={sale.price}
+      />
+    )}
+    {rent && (
+      <PriceTag
+        label="Alquiler"
+        currency={rent.currency ?? "USD"}
+        amount={rent.price}
+      />
+    )}
+    <div className="text-sm text-gray-500">
+      Ref. {p.legacy_id?.split("/").pop() ?? p.crm_id}
+    </div>
           </div>
         </header>
 
@@ -206,3 +229,27 @@ function Detail({
     </div>
   );
 }
+function PriceTag({
+  label,
+  currency,
+  amount,
+}: {
+  label: string;
+  currency: string;
+  amount: number | null;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      {/* etiqueta (Venta / Alquiler) */}
+      <span className="inline-block w-14 text-center text-xs bg-gold/20 text-gold-dark px-2 py-0.5">
+        {label}
+      </span>
+
+      {/* precio */}
+      <span className="text-2xl md:text-3xl font-bold text-gold-dark">
+        {amount ? `${currency} ${amount.toLocaleString("es-UY")}` : "-"}
+      </span>
+    </div>
+  );
+}
+
