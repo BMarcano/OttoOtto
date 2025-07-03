@@ -34,6 +34,7 @@ async function fetchRentals({
   let q = supabase
     .from("properties")
     .select("*", { count: "exact" }) // 👈 total filas
+    .eq("published", true)
     .eq("deal_type", "rent")
     .gte("price", priceMin)
     .lte("price", priceMax)

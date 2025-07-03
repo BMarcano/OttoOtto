@@ -34,6 +34,7 @@ async function fetchSales({
   let q = supabase
     .from("properties")
     .select("*", { count: "exact" }) // 👈 total rows
+    .eq("published", true)
     .eq("deal_type", "sale")
     .gte("price", priceMin)
     .lte("price", priceMax)

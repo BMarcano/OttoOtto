@@ -13,7 +13,7 @@ import {
   BedDouble,
   Car,
 } from "lucide-react";
-
+import { fetchProperty } from "@/lib/fetchProperty";
 import { supabase } from "@/lib/supabaseClient";
 import Gallery from "@/components/gallery";
 import ContactForm from "@/components/contact-form";
@@ -23,11 +23,9 @@ export default async function PropertyDetail({
 }: {
   params: { id: string };
 }) {
-const { data: p, error } = await supabase
-  .from("properties")
-  .select("*")
-  .eq("id", params.id)
-  .single();
+const p = await fetchProperty(params.id);   
+  if (!p) notFound();
+
 
 const { data: siblings } = await supabase
   .from("properties")
@@ -39,8 +37,6 @@ const deals = [p, ...(siblings ?? [])];
 
 const sale = deals.find((d) => d.deal_type === "sale") ?? null;
 const rent = deals.find((d) => d.deal_type === "rent") ?? null;
-
-if (error || !p) notFound();
 
   const priceTxt = `${p.currency || "USD"} ${
     p.price ? p.price.toLocaleString() : "-"

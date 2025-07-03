@@ -84,6 +84,7 @@ export default function Home() {
       const { data, error } = await supabase
         .from("properties")
         .select("*")
+        .eq("published", true)
         .eq("featured", true)                 // ⇦ cámbialo si no usas esta columna
         .order("created_at", { ascending:false })
         .limit(6)
