@@ -17,6 +17,7 @@ import { fetchProperty } from "@/lib/fetchProperty";
 import { supabase } from "@/lib/supabaseClient";
 import Gallery from "@/components/gallery";
 import ContactForm from "@/components/contact-form";
+import PropertySections from "@/components/property-sections";
 
 export default async function PropertyDetail({
   params,
@@ -41,14 +42,16 @@ const rent = deals.find((d) => d.deal_type === "rent") ?? null;
   const priceTxt = `${p.currency || "USD"} ${
     p.price ? p.price.toLocaleString() : "-"
   }`;
-  const features: string[] = p.features?.length
-    ? p.features
-    : [
-        p.bedrooms != null ? `${p.bedrooms} Dormitorios` : null,
-        p.bathrooms != null ? `${p.bathrooms} Baños` : null,
-        p.area != null ? `${p.area} m²` : null,
-        p.garage != null ? `${p.garage} Garaje${p.garage > 1 ? "s" : ""}` : null,
-      ].filter(Boolean) as string[];
+  const features: string[] = Array.isArray(p.features) && p.features.length
+  ? p.features
+  : [
+      p.bedrooms != null ? `${p.bedrooms} Dormitorios` : null,
+      p.bathrooms != null ? `${p.bathrooms} Baños` : null,
+      (p.area_total ?? p.area) != null ? `${p.area_total ?? p.area} m²` : null,
+      p.garage != null
+        ? `${p.garage_count ?? (p.garage ? 1 : 0)} Garaje${(p.garage_count ?? 1) > 1 ? "s" : ""}`
+        : null,
+    ].filter(Boolean) as string[];
 
   const gallery: string[] = (p.gallery_urls ?? []).filter(Boolean);
   const cover =
@@ -115,7 +118,6 @@ const rent = deals.find((d) => d.deal_type === "rent") ?? null;
         </header>
 
         <Gallery cover={cover} images={gallery} title={p.title} />
-
         <div className="container mx-auto px-4 mb-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-2">
@@ -128,19 +130,9 @@ const rent = deals.find((d) => d.deal_type === "rent") ?? null;
                 </p>
               </section>
 
-              <section className="bg-white p-6 rounded-lg shadow-md mb-8">
-                <h2 className="text-2xl font-secondary text-navy-dark mb-4">
-                  Características
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {features.map((f) => (
-                    <div key={f} className="flex items-center">
-                      <div className="h-2 w-2 bg-gold rounded-full mr-3" />
-                      <span className="text-gray-600">{f}</span>
-                    </div>
-                  ))}
-                </div>
-              </section>
+              
+              <PropertySections p={p} sale={sale} rent={rent} features={features} />
+
             </div>
 
             <aside>
@@ -169,14 +161,15 @@ const rent = deals.find((d) => d.deal_type === "rent") ?? null;
                   value={p.bathrooms ?? "-"}
                 />
                 <Detail
-                  icon={<Car className="h-5 w-5 text-gold mr-3" />}
-                  label="Garaje"
-                  value={
-                    p.garage != null
-                      ? `${p.garage} Garaje${p.garage > 1 ? "s" : ""}`
-                      : "-"
-                  }
-                />
+  icon={<Car className="h-5 w-5 text-gold mr-3" />}
+  label="Garaje"
+  value={
+    p.garage_count != null
+      ? `${p.garage_count} Garaje${p.garage_count > 1 ? "s" : ""}`
+      : (p.garage == null ? "-" : (p.garage ? "Sí" : "No"))
+  }
+/>
+
               </div>
 
               <div className="bg-white p-6 rounded-lg shadow-md">
