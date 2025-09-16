@@ -2,10 +2,11 @@
 
 import { useState, ReactNode } from "react";
 import {
-  MapPin, ExternalLink, Building2, Compass, Eye, DollarSign,
-  Home, Ruler, Bath, BedDouble, Car, Camera, PlayCircle, ShieldCheck
+  ExternalLink, Building2, Compass, Eye, DollarSign,
+  Camera, PlayCircle
 } from "lucide-react";
 import Image from "next/image";
+import SeasonPrices from "@/components/season-prices";
 
 function TabButton({active, onClick, children}: {active:boolean; onClick:()=>void; children:ReactNode}) {
   return (
@@ -55,14 +56,27 @@ export default function PropertySections({
   rent: any;
   features: string[];
 }) {
-  const tabs = ["Características","Ubicación","Edificio","Gastos","Amenities","Media"] as const;
-  const [tab, setTab] = useState<(typeof tabs)[number]>("Características");
+  // ---- detectar si hay temporada (>0) y si hay datos de agencia ----
+  const seasonRaw = p?.rent_season_prices_json;
+  const seasonObj = typeof seasonRaw === "string" ? safeParse(seasonRaw) : (seasonRaw || {});
+  const hasSeason = Object.values(seasonObj ?? {}).some((x: any) => Number(x) > 0);
+
+  const hasAgency = !!(p?.agency_name || p?.agency_logo_url || p?.broker_name || p?.agency_phone || p?.agency_email);
+
+  // tabs dinámicas
+  const baseTabs: string[] = ["Características","Ubicación","Edificio","Gastos","Amenities","Media"];
+  if (hasSeason) baseTabs.push("Temporada");
+
+  const [tab, setTab] = useState<string>("Características");
+
+  // moneda preferida para temporada / precios
+  const seasonCurrency = inferCurrency(p, sale, rent);
 
   return (
     <section className="bg-white p-6 rounded-lg shadow-md">
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {tabs.map(t => (
+        {baseTabs.map(t => (
           <TabButton key={t} active={tab===t} onClick={() => setTab(t)}>{t}</TabButton>
         ))}
       </div>
@@ -78,15 +92,6 @@ export default function PropertySections({
                 <span className="text-gray-600">{f}</span>
               </div>
             ))}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-6">
-            <Row label="Tipo" value={p.type ?? "Propiedad"} />
-            <Row label="Área total" value={p.area_total ? `${p.area_total} m²` : "-"} />
-            <Row label="Dormitorios" value={p.bedrooms ?? "-"} />
-            <Row label="Baños" value={p.bathrooms ?? "-"} />
-            <Row label="Garaje" value={p.garage != null ? (p.garage_count ?? (p.garage ? 1 : 0)) : "-"} />
-            <Row label="Estado" value={p.condition ?? "-"} />
           </div>
         </>
       )}
@@ -160,8 +165,6 @@ export default function PropertySections({
         </>
       )}
 
-      
-
       {tab === "Media" && (
         <>
           <h3 className="text-xl font-secondary text-navy-dark mb-4">Media</h3>
@@ -184,6 +187,29 @@ export default function PropertySections({
           </div>
         </>
       )}
+
+      {tab === "Temporada" && hasSeason && (
+        <>
+          <h3 className="text-xl font-secondary text-navy-dark mb-4">Tarifas por temporada</h3>
+          <SeasonPrices json={p.rent_season_prices_json} currency={seasonCurrency} />
+        </>
+      )}
+
+      
     </section>
   );
+}
+
+/* ---------------- utils locales ---------------- */
+function safeParse(s: string) {
+  try { return JSON.parse(s); } catch { return {}; }
+}
+
+function inferCurrency(p: any, sale: any, rent: any): string {
+  if (typeof p?.currency === "string" && p.currency) return p.currency;
+  if (typeof rent?.currency === "string" && rent.currency) return rent.currency;
+  if (rent?.rent_annual_usd) return "USD";
+  if (rent?.rent_annual_uyu) return "UYU";
+  if (typeof sale?.currency === "string" && sale.currency) return sale.currency;
+  return "USD";
 }
